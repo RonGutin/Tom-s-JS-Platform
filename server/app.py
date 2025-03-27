@@ -1,36 +1,63 @@
-from flask import Flask, request, jsonify
-from flask_socketio import SocketIO, join_room, leave_room, emit
+from flask import Flask, request, jsonify, abort
+from flask_socketio import SocketIO, join_room, emit
 from flask_cors import CORS
 import pymongo
 from bson.objectid import ObjectId
+from bson.errors import InvalidId
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # MongoDB connection
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["code_blocks_db"]
-code_blocks = db["code_blocks"]
+try:
+    client = pymongo.MongoClient("mongodb://localhost:27017/")
+    db = client["code_blocks_db"]
+    code_blocks = db["code_blocks"]
+except pymongo.errors.ConnectionFailure as e:
+    logger.error(f"Could not connect to MongoDB: {e}")
+    raise SystemExit(1)    
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"error": "Not found"}), 404
+
+@app.errorhandler(500)
+def server_error(error):
+    logger.error(f"Server error: {error}")
+    return jsonify({"error": "Internal server error"}), 500
 
 # API endpoints
 @app.route("/api/codeblocks", methods=["GET"])
 def get_all_blocks():
     # Fetch all code blocks for the lobby page
-    blocks = list(code_blocks.find({}, {"_id": {"$toString": "$_id"}, "title": 1, "code": 1}))
-    return jsonify(blocks)
+    try:
+        blocks = list(code_blocks.find({}, {"_id": {"$toString": "$_id"}, "title": 1, "code": 1}))
+        return jsonify(blocks)
+    except Exception as e:
+        logger.error(f"Error fetching code blocks: {e}")
+        abort(500)
 
 @app.route("/api/codeblocks/<id>", methods=["GET"])
 def get_block(id):
     # Fetch specific code block by ID
-    block = code_blocks.find_one({"_id": ObjectId(id)})
-    if block:
-        block["_id"] = str(block["_id"])
-        return jsonify(block)
-    return jsonify({"error": "Block not found"}), 404
+    try:
+        block = code_blocks.find_one({"_id": ObjectId(id)})
+        if block:
+            block["_id"] = str(block["_id"])
+            return jsonify(block)
+        abort(404)
+    except InvalidId:
+        abort(400)
+    except Exception as e:
+        logger.error(f"Unexpected error retrieving block: {e}")
+        abort(500)
 
 # Socket events
-
 @socketio.on("join_room")
 def handle_join(data):
     room = data["room"]
