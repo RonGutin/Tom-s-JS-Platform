@@ -8,6 +8,7 @@ import 'prismjs/components/prism-javascript';
 import './CodeBlock.css';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
+import Confetti from 'react-confetti';
 
 function CodeBlock() {
     // roomID
@@ -19,6 +20,10 @@ function CodeBlock() {
   const [studentCount, setStudentCount] = useState(0);
   const [isSolved, setIsSolved] = useState(false);
   const socketRef = useRef();
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
 
   useEffect(() => {
     // Fetch code block data
@@ -77,13 +82,29 @@ function CodeBlock() {
   const handleBackClick = () => {
     navigate('/');
   };
+
     // Apply syntax highlighting after code updates
     useEffect(() => {
         if (codeBlock) {
             Prism.highlightAll();
         }
         }, [code, codeBlock]);
-
+        useEffect(() => {
+            const updateWindowDimensions = () => {
+              setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight
+              });
+            };
+            // Set initial size
+            updateWindowDimensions();
+          
+            // Update when window resizes
+            window.addEventListener('resize', updateWindowDimensions);
+          
+          return () => window.removeEventListener('resize', updateWindowDimensions);
+        }, []);
+        
   if (!codeBlock) {
     return <div>Loading...</div>;
   }
@@ -100,11 +121,20 @@ function CodeBlock() {
       </div>
       
       {isSolved && (
-        <div className="solved-indicator">
-          <span className="smiley">😊</span>
-          <span>Great job! The solution is correct!</span>
-        </div>
-      )}
+        <>
+            <Confetti
+            width={windowSize.width}
+            height={windowSize.height}
+            recycle={false}
+            numberOfPieces={500}
+            gravity={0.3}
+            />
+            <div className="solved-indicator">
+            <span className="smiley">😊</span>
+            <span>Great job! The solution is correct!</span>
+            </div>
+        </>
+        )}
       
       <div className="code-editor-container">
         <CodeMirror
@@ -122,6 +152,22 @@ function CodeBlock() {
             style={{ textAlign: 'left' }}
         />
       </div>
+
+      {codeBlock.explanation && (
+        <div className="explanation-box">
+            <div className="explanation-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4682B4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            Tom's Tips
+            </div>
+            <div className="explanation-content">
+            {codeBlock.explanation}
+            </div>
+        </div>
+        )}
     </div>
   );
 }
