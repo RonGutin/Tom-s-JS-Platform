@@ -22,7 +22,7 @@ function Lobby() {
   return (
     <div className="lobby">
       <header className="lobby-header">
-        <h1 className="main-title">JavaScript with Dr Asaf Katz BAZIZA</h1>
+        <h1 className="main-title">JavaScript with Tom</h1>
         <p className="subtitle">Learn with the master while he's in Thailand</p>
       </header>
       
