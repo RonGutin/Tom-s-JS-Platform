@@ -58,7 +58,9 @@ function CodeBlock() {
 
     // Listen for code updates
     socketRef.current.on('code_update', (data) => {
-      setCode(data.code);
+      if (data.sender !== socketRef.current.id){
+        setCode(data.code);
+      }  
       setIsSolved(data.isSolved);
     });
     
@@ -113,7 +115,7 @@ function CodeBlock() {
   // Handle code changes
   const handleCodeChange = (value) => {
     setCode(value);
-    socketRef.current.emit('code_change', { room: id, code: value });
+    socketRef.current.emit('code_change', { room: id, code: value, sender: socketRef.current.id });
   };
 
   // Handle back button click
