@@ -41,7 +41,7 @@ function CodeBlock() {
     fetchCodeBlock();
 
     // Setup Socket.IO connection
-    socketRef.current = io('API_BASE_URL');
+    socketRef.current = io(API_BASE_URL);
     
     // Join the room
     socketRef.current.emit('join_room', { room: id });
