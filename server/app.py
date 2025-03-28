@@ -45,6 +45,7 @@ def get_all_blocks():
     # Fetch all code blocks for the lobby page
     try:
         blocks = list(code_blocks.find({}, {"_id": {"$toString": "$_id"}, "title": 1, "code": 1}))
+    
         return jsonify(blocks)
     except Exception as e:
         logger.error(f"Error fetching code blocks: {e}")
@@ -164,6 +165,8 @@ def handle_code_change(data):
     emit("code_update", {"code": code, "isSolved": is_solved}, to=room)
 
 if __name__ == "__main__":
+    raise Exception("Ariel ha SHAMEN")
+
     code_blocks.delete_many({})
     print("Database cleared. Inserting fresh code blocks...")
     
