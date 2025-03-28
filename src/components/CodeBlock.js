@@ -66,12 +66,49 @@ function CodeBlock() {
       navigate('/');
     });
 
+    socketRef.current.on('room_not_found', (data) => {
+      alert(data.message);
+      navigate('/');
+    });
+    
+    socketRef.current.on('redirect_to_lobby', () => {
+      navigate('/');
+    });
+    
+    socketRef.current.on('error', (data) => {
+      alert(`Error: ${data.message}`);
+    });
+
     // Cleanup on unmount
     return () => {
       socketRef.current.disconnect();
     };
   }, [id, navigate]);
 
+
+  // Apply syntax highlighting after code updates
+  useEffect(() => {
+      if (codeBlock) {
+          Prism.highlightAll();
+      }
+      }, [code, codeBlock]);
+
+  useEffect(() => {
+      const updateWindowDimensions = () => {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight
+        });
+      };
+      // Set initial size
+      updateWindowDimensions();
+    
+      // Update when window resizes
+      window.addEventListener('resize', updateWindowDimensions);
+    
+    return () => window.removeEventListener('resize', updateWindowDimensions);
+  }, []);
+      
   // Handle code changes
   const handleCodeChange = (value) => {
     setCode(value);
@@ -83,28 +120,6 @@ function CodeBlock() {
     navigate('/');
   };
 
-    // Apply syntax highlighting after code updates
-    useEffect(() => {
-        if (codeBlock) {
-            Prism.highlightAll();
-        }
-        }, [code, codeBlock]);
-        useEffect(() => {
-            const updateWindowDimensions = () => {
-              setWindowSize({
-                width: window.innerWidth,
-                height: window.innerHeight
-              });
-            };
-            // Set initial size
-            updateWindowDimensions();
-          
-            // Update when window resizes
-            window.addEventListener('resize', updateWindowDimensions);
-          
-          return () => window.removeEventListener('resize', updateWindowDimensions);
-        }, []);
-        
   if (!codeBlock) {
     return <div>Loading...</div>;
   }
