@@ -98,9 +98,6 @@ def initialize_database():
     # Reset student counts and mentor assignments
     code_blocks.update_many({}, {"$set": {"studentCount": 0, "mentorId": None}})
 
-code_blocks.delete_many({})
-print("Database cleared. Inserting fresh code blocks...")
-
 initialize_database()
 
 @app.errorhandler(404)
