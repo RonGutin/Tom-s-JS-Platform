@@ -35,7 +35,60 @@ def initialize_database():
         print("Database empty. Inserting initial code blocks...")
         
         initial_blocks = [
-            # Your blocks here...
+            {
+                "title": "Declaring Variables",
+                "code": "// Replace the comments below with your code\n// Declare three variables:\n// 1. A string named 'greeting' with value 'Hello world!'\n// 2. A number named 'score' with value 100\n// 3. A boolean named 'isActive' with value true",
+                "originalCode": "// Replace the comments below with your code\n// Declare three variables:\n// 1. A string named 'greeting' with value 'Hello world!'\n// 2. A number named 'score' with value 100\n// 3. A boolean named 'isActive' with value true",
+                "solution": "const greeting = 'Hello world!';\nconst score = 100;\nconst isActive = true;",
+                "explanation": "In JavaScript, use const for values that won't change and let for variables that will change. Remember that strings need quotes, numbers don't, and booleans are either true or false.",
+                "mentorId": None,
+                "studentCount": 0
+            },
+            {
+                "title": "Array Methods",
+                "code": "const numbers = [1, 2, 3, 4, 5];\n// Replace this comment with code to filter even numbers",
+                "originalCode": "const numbers = [1, 2, 3, 4, 5];\n// Replace this comment with code to filter even numbers",
+                "solution": "const numbers = [1, 2, 3, 4, 5];\nconst evenNumbers = numbers.filter(num => num % 2 === 0);",
+                "explanation": "The filter() method creates a new array with elements that pass a test. Recall the modulo operator (%) that can help identify even numbers.",
+                "studentCount": 0,
+                "mentorId": None
+            },
+            {
+                "title": "String Reversal",
+                "code": "function reverseString(text) {\n  // Replace this comment with code to reverse the string\n  // Return the string reversed\n}",
+                "originalCode": "function reverseString(text) {\n  // Replace this comment with code to reverse the string\n  // Return the string reversed\n}",
+                "solution": "function reverseString(text) {\n  return text.split('').reverse().join('');\n}",
+                "explanation": "String reversal is a common coding challenge.\n Try using string methods in sequence: first split() the string into an array of characters, then reverse() the array, and finally join() it back into a string",
+                "mentorId": None,
+                "studentCount": 0
+            },
+            {
+                "title": "Counter Function",
+                "code": "function createCounter() {\n  // Replace this comment with code that:\n  // 1. Creates a variable to track count\n  // 2. Returns an object with three methods\n  //    - increment: increases count by 1\n  //    - decrement: decreases count by 1\n  //    - getValue: returns current count\n}",
+                "originalCode": "function createCounter() {\n  // Replace this comment with code that:\n  // 1. Creates a variable to track count\n  // 2. Returns an object with three methods\n  //    - increment: increases count by 1\n  //    - decrement: decreases count by 1\n  //    - getValue: returns current count\n}",
+                "solution": "function createCounter() {\n  let count = 0;\n  return {\n    increment: function() { count++; },\n    decrement: function() { count--; },\n    getValue: function() { return count; }\n  };\n}",
+                "explanation": "Use a closure to preserve the counter variable. Define a local variable inside the outer function, then return an object with methods that can access that variable even after the outer function completes.",
+                "mentorId": None,
+                "studentCount": 0
+            },
+            {
+                "title": "Async Function",
+                "code": "async function fetchData() {\n  // Replace this comment with code that:\n  // 1. Fetches data from 'https://api.example.com/data'\n  // 2. Parses the JSON response\n  // 3. Returns the parsed data\n}",
+                "originalCode": "async function fetchData() {\n  // Replace this comment with code that:\n  // 1. Fetches data from 'https://api.example.com/data'\n  // 2. Parses the JSON response\n  // 3. Returns the parsed data\n}",
+                "solution": "async function fetchData() {\n  const response = await fetch('https://api.example.com/data');\n  const data = await response.json();\n  return data;\n}",
+                "explanation": "The async keyword lets you use await to pause execution until a Promise resolves. This makes asynchronous code much easier to read and write compared to Promise chains.",
+                "studentCount": 0,
+                "mentorId": None
+            },
+            {
+                "title": "DOM Manipulation",
+                "code": "// Replace this comment with a function called addElement that:\n// 1. Takes a text parameter\n// 2. Creates a new div element\n// 3. Sets the div's text content to the parameter\n// 4. Adds the div to the document body\n// 5. Returns the created element",
+                "originalCode": "// Replace this comment with a function called addElement that:\n// 1. Takes a text parameter\n// 2. Creates a new div element\n// 3. Sets the div's text content to the parameter\n// 4. Adds the div to the document body\n// 5. Returns the created element",
+                "solution": "function addElement(text) {\n  const newDiv = document.createElement('div');\n  newDiv.textContent = text;\n  document.body.appendChild(newDiv);\n  return newDiv;\n}",
+                "explanation": "Remember the three steps: create an element with document.createElement(), modify its properties, and append it to the document with appendChild(). Don't forget to return the created element.",
+                "studentCount": 0,
+                "mentorId": None
+            }
         ]
         
         code_blocks.insert_many(initial_blocks)
@@ -44,6 +97,9 @@ def initialize_database():
 
     # Reset student counts and mentor assignments
     code_blocks.update_many({}, {"$set": {"studentCount": 0, "mentorId": None}})
+
+code_blocks.delete_many({})
+print("Database cleared. Inserting fresh code blocks...")
 
 initialize_database()
 
