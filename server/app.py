@@ -1,21 +1,29 @@
+import logging
+import pymongo
+import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, abort
 from flask_socketio import SocketIO, join_room, emit
 from flask_cors import CORS
-import pymongo
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
-import logging
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=[
+    "http://localhost:3000",  
+    os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+    ])
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # MongoDB connection
 try:
-    client = pymongo.MongoClient("mongodb://localhost:27017/")
+    mongodb_uri = os.environ.get('MONGODB_URI', 'mongodb://localhost:27017/')
+    client = pymongo.MongoClient(mongodb_uri)
     db = client["code_blocks_db"]
     code_blocks = db["code_blocks"]
 except pymongo.errors.ConnectionFailure as e:
@@ -159,7 +167,7 @@ if __name__ == "__main__":
     code_blocks.delete_many({})
     print("Database cleared. Inserting fresh code blocks...")
     
-    initial_blocks = initial_blocks = [
+    initial_blocks = [
     {
         "title": "Declaring Variables",
         "code": "// Replace the comments below with your code\n// Declare three variables:\n// 1. A string named 'greeting' with value 'Hello world!'\n// 2. A number named 'score' with value 100\n// 3. A boolean named 'isActive' with value true",
@@ -218,4 +226,10 @@ if __name__ == "__main__":
     
     code_blocks.insert_many(initial_blocks)
 
-    socketio.run(app, debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+
+    if os.environ.get('ENVIRONMENT') == 'production':
+        socketio.run(app, host='0.0.0.0', port=port, cors_allowed_origins="*")
+    else:
+        # For development (Local)
+        socketio.run(app, debug=True, port=port)

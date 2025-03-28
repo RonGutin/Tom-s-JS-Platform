@@ -27,9 +27,10 @@ function CodeBlock() {
 
   useEffect(() => {
     // Fetch code block data
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     const fetchCodeBlock = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/codeblocks/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/api/codeblocks/${id}`);
         setCodeBlock(response.data);
         setCode(response.data.code);
       } catch (error) {
@@ -40,7 +41,7 @@ function CodeBlock() {
     fetchCodeBlock();
 
     // Setup Socket.IO connection
-    socketRef.current = io('http://localhost:5000');
+    socketRef.current = io('API_BASE_URL');
     
     // Join the room
     socketRef.current.emit('join_room', { room: id });

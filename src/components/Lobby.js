@@ -7,9 +7,10 @@ function Lobby() {
   const [codeBlocks, setCodeBlocks] = useState([]);
   
   useEffect(() => {
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     const fetchCodeBlocks = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/codeblocks');
+        const response = await axios.get(`${API_BASE_URL}/api/codeblocks`);
         setCodeBlocks(response.data);
       } catch (error) {
         console.error('Error fetching code blocks:', error);
