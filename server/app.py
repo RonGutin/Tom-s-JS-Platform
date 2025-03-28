@@ -63,35 +63,46 @@ def handle_join(data):
     room = data["room"]
     join_room(room)
     
-    print(f"JOIN: User {request.sid} joining room {room}")
-    
-    # Find room in database
-    block = code_blocks.find_one({"_id": ObjectId(room)})
-    
-    # First visitor to this specific room is the mentor
-    is_mentor = block.get("mentorId") is None
-    
-    if is_mentor:
-        # Set this user as mentor for this room
-        code_blocks.update_one(
-            {"_id": ObjectId(room)},
-            {"$set": {"mentorId": request.sid}}
-        )
-        print(f"User {request.sid} set as mentor for room {room}")
-    else:
-        # Increment student count
-        code_blocks.update_one(
-            {"_id": ObjectId(room)},
-            {"$inc": {"studentCount": 1}}
-        )
-        print(f"Student joined room {room}, incrementing count")
-    
-    # Send role to client
-    emit("role_assigned", {"isMentor": is_mentor})
-    
-    # Update everyone with current count
-    updated_block = code_blocks.find_one({"_id": ObjectId(room)})
-    emit("room_update", {"studentCount": updated_block["studentCount"]}, to=room)
+    print(f"ROOM JOIN: User {request.sid} joining room {room}")
+    try:
+        # Find room in database
+        block = code_blocks.find_one({"_id": ObjectId(room)})
+        
+        if block is None:
+            # Handle case where room ID doesn't exist
+            emit("room_not_found", {"message": "The requested code block doesn't exist"})
+            # back to lobby
+            emit("redirect_to_lobby")
+            return
+        
+        # First visitor to this specific room is the mentor
+        is_mentor = block.get("mentorId") is None
+        
+        if is_mentor:
+            # Set this user as mentor for this room
+            code_blocks.update_one(
+                {"_id": ObjectId(room)},
+                {"$set": {"mentorId": request.sid}}
+            )
+            print(f"User {request.sid} set as mentor for room {room}")
+        else:
+            # Increment student count
+            code_blocks.update_one(
+                {"_id": ObjectId(room)},
+                {"$inc": {"studentCount": 1}}
+            )
+            print(f"Student joined room {room}, incrementing count")
+        
+        # Send role to client
+        emit("role_assigned", {"isMentor": is_mentor})
+        
+        # Update everyone with current count
+        updated_block = code_blocks.find_one({"_id": ObjectId(room)})
+        emit("room_update", {"studentCount": updated_block["studentCount"]}, to=room)
+
+    except Exception as e:
+        print(f"Error in join_room: {str(e)}")
+        emit("error", {"message": "Server error"})
 
 @socketio.on("disconnect")
 def handle_disconnect():
