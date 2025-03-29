@@ -121,9 +121,21 @@ function CodeBlock() {
       
   // Handle code changes
   const handleCodeChange = (value) => {
-    console.log('Sending code change, my ID:', socketRef.current.id);
     setCode(value);
-    socketRef.current.emit('code_change', { room: id, code: value, sender: socketRef.current.id });
+    
+    // Make sure we have a valid socket connection and ID
+    if (socketRef.current && socketRef.current.connected) {
+      const senderID = socketRef.current.id || 'unknown';
+      console.log('Sending code change, sender ID:', senderID);
+      
+      socketRef.current.emit('code_change', { 
+        room: id, 
+        code: value, 
+        sender: senderID 
+      });
+    } else {
+      console.error('Socket not connected, cannot send code update');
+    }
   };
 
   // Handle back button click

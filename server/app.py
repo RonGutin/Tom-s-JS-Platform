@@ -221,7 +221,7 @@ def handle_disconnect():
 def handle_code_change(data):
     room = data["room"]
     code = data["code"]
-    sender = data["sender"]
+    sender = data.get("sender", request.sid)
 
     print(f"CODE CHANGE RECEIVED: Room {room}, Sender {sender}")
 
@@ -238,7 +238,7 @@ def handle_code_change(data):
     print(f"EMITTING code_update TO ROOM: {room}, isSolved: {is_solved}")
 
     # Send update to all users in the room
-    socketio.emit("code_update", {"code": code, "isSolved": is_solved, "sender":sender}, to=room)
+    emit("code_update", {"code": code, "isSolved": is_solved, "sender":sender}, to=room)
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
