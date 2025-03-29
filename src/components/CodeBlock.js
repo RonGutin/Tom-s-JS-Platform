@@ -41,7 +41,10 @@ function CodeBlock() {
     fetchCodeBlock();
 
     // Setup Socket.IO connection
-    socketRef.current = io(API_BASE_URL);
+    socketRef.current = io(API_BASE_URL, {
+      transports: ['websocket', 'polling'],  
+      reconnection: true,
+    });
     
     // Join the room
     socketRef.current.emit('join_room', { room: id });
@@ -58,6 +61,10 @@ function CodeBlock() {
 
     // Listen for code updates
     socketRef.current.on('code_update', (data) => {
+      console.log('Code update received:', data);
+      console.log('My socket ID:', socketRef.current.id);
+      console.log('Sender socket ID:', data.sender);
+
       if (data.sender !== socketRef.current.id){
         setCode(data.code);
       }  
@@ -114,6 +121,7 @@ function CodeBlock() {
       
   // Handle code changes
   const handleCodeChange = (value) => {
+    console.log('Sending code change, my ID:', socketRef.current.id);
     setCode(value);
     socketRef.current.emit('code_change', { room: id, code: value, sender: socketRef.current.id });
   };

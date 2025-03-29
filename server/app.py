@@ -222,6 +222,9 @@ def handle_code_change(data):
     room = data["room"]
     code = data["code"]
     sender = data["sender"]
+
+    print(f"CODE CHANGE RECEIVED: Room {room}, Sender {sender}")
+
     # Save the updated code in the database
     code_blocks.update_one(
         {"_id": ObjectId(room)},
@@ -232,8 +235,10 @@ def handle_code_change(data):
     block = code_blocks.find_one({"_id": ObjectId(room)})
     is_solved = code.strip() == block["solution"].strip()
     
+    print(f"EMITTING code_update TO ROOM: {room}, isSolved: {is_solved}")
+
     # Send update to all users in the room
-    emit("code_update", {"code": code, "isSolved": is_solved, "sender":sender}, to=room)
+    socketio.emit("code_update", {"code": code, "isSolved": is_solved, "sender":sender}, to=room)
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
